@@ -15,6 +15,7 @@ import {
   filterSuggestionsBM25,
 } from "@web-speed-hackathon-2026/client/src/utils/bm25_search";
 import { fetchJSON } from "@web-speed-hackathon-2026/client/src/utils/fetchers";
+import { getKuromojiTokenizer } from "@web-speed-hackathon-2026/client/src/utils/kuromoji_tokenizer";
 
 interface Props {
   isStreaming: boolean;
@@ -91,17 +92,14 @@ export const ChatInput = ({ isStreaming, onSendMessage }: Props) => {
     }
   }, [suggestions, showSuggestions]);
 
-  // 初回にkuromojiトークナイザーを構築
+  // 初回にkuromojiトークナイザーを構築（シングルトンで共有）
   useEffect(() => {
     let mounted = true;
 
-    // kuromoji は使用時のみ動的ロードしてバンドルから分離する
-    import("kuromoji").then((kuromoji) => {
-      kuromoji.builder({ dicPath: "/dicts" }).build((err: Error | null, nextTokenizer: Tokenizer<IpadicFeatures>) => {
-        if (!err && mounted) {
-          setTokenizer(nextTokenizer);
-        }
-      });
+    getKuromojiTokenizer().then((t) => {
+      if (mounted) {
+        setTokenizer(t);
+      }
     });
 
     return () => {
