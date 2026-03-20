@@ -127,6 +127,44 @@ const config = {
     minimize: true,
     splitChunks: {
       chunks: "all",
+      cacheGroups: {
+        // React/Router/Redux: 初期ロード必須の軽量コアのみ
+        react: {
+          test: /[\\/]node_modules[\\/](react|react-dom|react-router|react-helmet|redux|react-redux|redux-form)[\\/]/,
+          name: "vendor",
+          priority: 100,
+          enforce: true,
+        },
+        // Markdown/Math系: 投稿詳細ページでのみ使用
+        markdown: {
+          test: /[\\/]node_modules[\\/](katex|remark-|rehype-|react-syntax-highlighter|react-markdown|unified|micromark|mdast-|hast-|unist-)[\\/]/,
+          name: "markdown",
+          priority: 50,
+          chunks: "async",
+        },
+        // メディア処理: 投稿作成時のみ使用
+        media: {
+          test: /[\\/]node_modules[\\/](@ffmpeg|@imagemagick)[\\/]/,
+          name: "media",
+          priority: 50,
+          chunks: "async",
+        },
+        // AI翻訳: 翻訳ボタン押下時のみ
+        ai: {
+          test: /[\\/]node_modules[\\/](@mlc-ai)[\\/]/,
+          name: "ai",
+          priority: 50,
+          chunks: "async",
+        },
+        // その他のnode_modules（初期ロードチャンクのみ）
+        otherVendors: {
+          test: /[\\/]node_modules[\\/]/,
+          name: "otherVendors",
+          priority: 10,
+          chunks: "initial",
+          reuseExistingChunk: true,
+        },
+      },
     },
     concatenateModules: true,
     usedExports: true,

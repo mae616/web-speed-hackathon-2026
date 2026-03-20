@@ -28,6 +28,7 @@ export const CoveredImage = ({ alt, src }: Props) => {
         width={640}
         height={360}
         decoding="async"
+        fetchPriority="high"
         src={src}
       />
 

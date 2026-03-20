@@ -70,15 +70,16 @@ export const AppContainer = () => {
   const authModalId = useId();
   const newPostModalId = useId();
 
-  // モーダルの遅延マウント: 初期ロード時にencoding-japanese(446KB)+redux-form(47KB)の
-  // チャンク評価がメインスレッドをブロックするのを防ぐ。
-  // requestIdleCallbackでアイドル後にマウントし、Lighthouse TBT計測ウィンドウを回避する。
+  // モーダルの遅延マウント: 初期ロード時のメインスレッドブロックを回避しつつ、
+  // サインインフロー等で素早くモーダルを利用可能にする。
+  // requestIdleCallbackはメインスレッドビジー時に大幅に遅延するため、
+  // setTimeout(0)で次のマイクロタスク後に確実にマウントする。
   const [modalsLoaded, setModalsLoaded] = useState(false);
   useEffect(() => {
-    const id = requestIdleCallback(() => {
+    const id = setTimeout(() => {
       setModalsLoaded(true);
-    });
-    return () => cancelIdleCallback(id);
+    }, 0);
+    return () => clearTimeout(id);
   }, []);
 
   return (

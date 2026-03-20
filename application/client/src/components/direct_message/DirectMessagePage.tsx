@@ -43,7 +43,6 @@ export const DirectMessagePage = ({
   const [text, setText] = useState("");
   const textAreaRows = Math.min((text || "").split("\n").length, 5);
   const isInvalid = text.trim().length === 0;
-  const scrollHeightRef = useRef(0);
 
   const handleChange = useCallback(
     (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -73,17 +72,10 @@ export const DirectMessagePage = ({
     [onSubmit, text],
   );
 
+  // メッセージ数が変わったときだけ末尾にスクロール
   useEffect(() => {
-    const id = setInterval(() => {
-      const height = Number(window.getComputedStyle(document.body).height.replace("px", ""));
-      if (height !== scrollHeightRef.current) {
-        scrollHeightRef.current = height;
-        window.scrollTo(0, height);
-      }
-    }, 1);
-
-    return () => clearInterval(id);
-  }, []);
+    window.scrollTo(0, document.body.scrollHeight);
+  }, [conversation.messages.length]);
 
   if (conversationError != null) {
     return (
