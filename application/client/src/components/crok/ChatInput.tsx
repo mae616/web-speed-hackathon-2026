@@ -1,4 +1,4 @@
-import kuromoji, { type Tokenizer, type IpadicFeatures } from "kuromoji";
+import type { Tokenizer, IpadicFeatures } from "kuromoji";
 import {
   useEffect,
   useLayoutEffect,
@@ -95,10 +95,13 @@ export const ChatInput = ({ isStreaming, onSendMessage }: Props) => {
   useEffect(() => {
     let mounted = true;
 
-    kuromoji.builder({ dicPath: "/dicts" }).build((err, nextTokenizer) => {
-      if (!err && mounted) {
-        setTokenizer(nextTokenizer);
-      }
+    // kuromoji は使用時のみ動的ロードしてバンドルから分離する
+    import("kuromoji").then((kuromoji) => {
+      kuromoji.builder({ dicPath: "/dicts" }).build((err: Error | null, nextTokenizer: Tokenizer<IpadicFeatures>) => {
+        if (!err && mounted) {
+          setTokenizer(nextTokenizer);
+        }
+      });
     });
 
     return () => {

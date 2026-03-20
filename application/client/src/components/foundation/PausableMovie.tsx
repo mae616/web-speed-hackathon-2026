@@ -1,6 +1,5 @@
 import classNames from "classnames";
-import { Animator, Decoder } from "gifler";
-import { GifReader } from "omggif";
+import type { Animator } from "gifler";
 import { RefCallback, useCallback, useRef, useState } from "react";
 
 import { AspectRatioBox } from "@web-speed-hackathon-2026/client/src/components/foundation/AspectRatioBox";
@@ -18,7 +17,7 @@ interface Props {
 export const PausableMovie = ({ src }: Props) => {
   const { data, isLoading } = useFetch(src, fetchBinary);
 
-  const animatorRef = useRef<Animator>(null);
+  const animatorRef = useRef<Animator | null>(null);
   const canvasCallbackRef = useCallback<RefCallback<HTMLCanvasElement>>(
     (el) => {
       animatorRef.current?.stop();
@@ -27,24 +26,27 @@ export const PausableMovie = ({ src }: Props) => {
         return;
       }
 
-      // GIF を解析する
-      const reader = new GifReader(new Uint8Array(data));
-      const frames = Decoder.decodeFramesSync(reader);
-      const animator = new Animator(reader, frames);
+      // gifler/omggif は使用時のみ動的ロードしてバンドルから分離する
+      (async () => {
+        const { Decoder, Animator: GifAnimator } = await import("gifler");
+        const { GifReader } = await import("omggif");
+        const reader = new GifReader(new Uint8Array(data));
+        const frames = Decoder.decodeFramesSync(reader);
+        const animator = new GifAnimator(reader, frames);
 
-      animator.animateInCanvas(el);
-      animator.onFrame(frames[0]!);
+        animator.animateInCanvas(el);
+        animator.onFrame(frames[0]!);
 
-      // 視覚効果 off のとき GIF を自動再生しない
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        setIsPlaying(false);
-        animator.stop();
-      } else {
-        setIsPlaying(true);
-        animator.start();
-      }
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          setIsPlaying(false);
+          animator.stop();
+        } else {
+          setIsPlaying(true);
+          animator.start();
+        }
 
-      animatorRef.current = animator;
+        animatorRef.current = animator;
+      })();
     },
     [data],
   );

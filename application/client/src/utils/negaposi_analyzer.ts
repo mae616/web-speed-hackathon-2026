@@ -1,18 +1,7 @@
-import kuromoji, { type Tokenizer, type IpadicFeatures } from "kuromoji";
-import analyze from "negaposi-analyzer-ja";
-
-/** kuromoji トークナイザーをPromiseで初期化する（Bluebird不要） */
-function getTokenizer(): Promise<Tokenizer<IpadicFeatures>> {
-  return new Promise((resolve, reject) => {
-    kuromoji.builder({ dicPath: "/dicts" }).build((err, tokenizer) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(tokenizer);
-      }
-    });
-  });
-}
+/**
+ * テキストの感情分析ユーティリティ。
+ * kuromoji と negaposi-analyzer-ja は使用時のみ動的ロードする。
+ */
 
 type SentimentResult = {
   score: number;
@@ -21,9 +10,19 @@ type SentimentResult = {
 
 /** テキストの感情分析を行い、スコアとラベルを返す */
 export async function analyzeSentiment(text: string): Promise<SentimentResult> {
-  const tokenizer = await getTokenizer();
-  const tokens = tokenizer.tokenize(text);
+  const kuromoji = await import("kuromoji");
+  const { default: analyze } = await import("negaposi-analyzer-ja");
 
+  const tokenizer = await new Promise<ReturnType<ReturnType<typeof kuromoji.builder>["build"]> extends void ? never : any>(
+    (resolve, reject) => {
+      kuromoji.builder({ dicPath: "/dicts" }).build((err: Error | null, tokenizer: any) => {
+        if (err) reject(err);
+        else resolve(tokenizer);
+      });
+    },
+  );
+
+  const tokens = tokenizer.tokenize(text);
   const score = analyze(tokens);
 
   let label: SentimentResult["label"];

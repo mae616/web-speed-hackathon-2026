@@ -1,3 +1,4 @@
+import { AudioContext as StdAudioContext } from "standardized-audio-context";
 import { useEffect, useRef, useState } from "react";
 
 interface ParsedData {
@@ -7,7 +8,7 @@ interface ParsedData {
 
 /** 音声データから波形のピーク値を計算する */
 async function calculate(data: ArrayBuffer): Promise<ParsedData> {
-  const audioCtx = new AudioContext();
+  const audioCtx = new StdAudioContext();
 
   // 音声をデコードする
   const buffer = await audioCtx.decodeAudioData(data.slice(0));
