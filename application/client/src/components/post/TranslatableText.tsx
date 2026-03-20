@@ -1,7 +1,6 @@
 import { useCallback, useState } from "react";
 
-// createTranslatorはcommon-tags/json-repair-js/langs等の重いライブラリを含むため、
-// ボタンクリック時にのみdynamic importしてTBTを改善する
+// createTranslatorはボタンクリック時にのみdynamic importしてTBTを改善する
 
 type State =
   | { type: "idle"; text: string }

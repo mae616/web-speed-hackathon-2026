@@ -149,13 +149,6 @@ const config = {
           priority: 50,
           chunks: "async",
         },
-        // AI翻訳: 翻訳ボタン押下時のみ
-        ai: {
-          test: /[\\/]node_modules[\\/](@mlc-ai)[\\/]/,
-          name: "ai",
-          priority: 50,
-          chunks: "async",
-        },
         // その他のnode_modules（初期ロードチャンクのみ）
         otherVendors: {
           test: /[\\/]node_modules[\\/]/,
