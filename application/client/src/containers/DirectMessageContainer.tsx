@@ -65,23 +65,13 @@ export const DirectMessageContainer = ({ activeUser, authModalId }: Props) => {
     async (params: DirectMessageFormData) => {
       setIsSubmitting(true);
       try {
-        // 送信成功後、レスポンスのメッセージを直接追加（フルリロード回避でINP/TBT改善）
-        const newMessage = await sendJSON<Models.DirectMessage>(
-          `/api/v1/dm/${conversationId}/messages`,
-          { body: params.body },
-        );
-        setConversation((prev) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            messages: [...prev.messages, newMessage],
-          };
-        });
+        await sendJSON(`/api/v1/dm/${conversationId}/messages`, { body: params.body });
+        loadConversation();
       } finally {
         setIsSubmitting(false);
       }
     },
-    [conversationId],
+    [conversationId, loadConversation],
   );
 
   const handleTyping = useCallback(async () => {

@@ -36,9 +36,8 @@ export async function convertMovie(file: File, options: Options): Promise<Blob> 
 
   const output = (await ffmpeg.readFile(exportFile)) as Uint8Array<ArrayBuffer>;
 
-  // シングルトンのため仮想ファイルのみ削除（terminate()しない）
-  await ffmpeg.deleteFile("file");
-  await ffmpeg.deleteFile(exportFile);
+  ffmpeg.terminate();
 
-  return new Blob([output]);
+  const blob = new Blob([output]);
+  return blob;
 }
