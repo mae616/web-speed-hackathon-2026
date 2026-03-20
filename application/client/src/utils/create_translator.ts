@@ -14,8 +14,9 @@ interface Params {
 }
 
 /** Web LLMエンジンのシングルトンキャッシュ（数GBのモデル再ロード防止） */
-let cachedEngine: Awaited<ReturnType<typeof import("@mlc-ai/web-llm")>["CreateMLCEngine"]> | null = null;
-let enginePromise: Promise<typeof cachedEngine> | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let cachedEngine: any = null;
+let enginePromise: Promise<any> | null = null;
 
 /** Web LLMエンジンをシングルトンで取得する */
 async function getMLCEngine() {
