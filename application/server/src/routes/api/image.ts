@@ -9,8 +9,8 @@ import { v4 as uuidv4 } from "uuid";
 
 import { UPLOAD_PATH } from "@web-speed-hackathon-2026/server/src/paths";
 
-// 変換した画像の拡張子
-const EXTENSION = "jpg";
+// 配信する画像の拡張子（シード画像はWebP、アップロードはJPGをWebP拡張子で保存）
+const EXTENSION = "webp";
 
 /**
  * JPEGバイナリからEXIF ImageDescriptionを抽出してalt文字列として返す。
@@ -41,7 +41,8 @@ imageRouter.post("/images", async (req, res) => {
   }
 
   const type = await fileTypeFromBuffer(req.body);
-  if (type === undefined || type.ext !== EXTENSION) {
+  // クライアントはJPGで送信するが、WebP拡張子で保存する（EXIF抽出のためJPGで受け取る）
+  if (type === undefined || (type.ext !== "jpg" && type.ext !== "webp")) {
     throw new httpErrors.BadRequest("Invalid file type");
   }
 
