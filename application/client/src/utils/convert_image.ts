@@ -1,13 +1,18 @@
 import { initializeImageMagick, ImageMagick, MagickFormat } from "@imagemagick/magick-wasm";
-import magickWasm from "@imagemagick/magick-wasm/magick.wasm?binary";
+import magickWasmUrl from "@imagemagick/magick-wasm/magick.wasm?binary";
 import { dump, insert, ImageIFD } from "piexifjs";
 
 interface Options {
   extension: MagickFormat;
 }
 
+/**
+ * 画像をImageMagick WASMで変換する。
+ * WASMバイナリはasset/resourceとして別ファイルに出力され、実行時にフェッチされる。
+ */
 export async function convertImage(file: File, options: Options): Promise<Blob> {
-  await initializeImageMagick(magickWasm);
+  const wasmBinary = await fetch(magickWasmUrl).then((res) => res.arrayBuffer());
+  await initializeImageMagick(wasmBinary);
 
   const byteArray = new Uint8Array(await file.arrayBuffer());
 
