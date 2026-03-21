@@ -16,16 +16,17 @@ import { AuthModalContainer } from "@web-speed-hackathon-2026/client/src/contain
 import { DirectMessageContainer } from "@web-speed-hackathon-2026/client/src/containers/DirectMessageContainer";
 import { DirectMessageListContainer } from "@web-speed-hackathon-2026/client/src/containers/DirectMessageListContainer";
 import { NewPostModalContainer } from "@web-speed-hackathon-2026/client/src/containers/NewPostModalContainer";
+/**
+ * TimelineContainerもlazy()から外す。
+ * ホームは最頻アクセスページで、チャンクロード排除によりTBT/LCP改善を狙う。
+ */
+import { TimelineContainer } from "@web-speed-hackathon-2026/client/src/containers/TimelineContainer";
 import { fetchJSON, sendJSON } from "@web-speed-hackathon-2026/client/src/utils/fetchers";
 
 /**
  * 各ルートコンテナをReact.lazyで遅延ロードする。
- * これにより初期バンドルにはReact+Router+Reduxのみが含まれ、
- * 各ページの依存（kuromoji, katex, gifler等）はルート遷移時にロードされる。
+ * 重い依存（kuromoji, katex, gifler等）を持つページのみlazy。
  */
-const TimelineContainer = lazy(() =>
-  import("@web-speed-hackathon-2026/client/src/containers/TimelineContainer").then((m) => ({ default: m.TimelineContainer })),
-);
 const SearchContainer = lazy(() =>
   import("@web-speed-hackathon-2026/client/src/containers/SearchContainer").then((m) => ({ default: m.SearchContainer })),
 );
