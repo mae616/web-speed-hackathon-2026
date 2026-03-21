@@ -27,6 +27,8 @@ interface Props {
 
 export const DirectMessageContainer = ({ activeUser, authModalId }: Props) => {
   const { conversationId = "" } = useParams<{ conversationId: string }>();
+  // Hooksは条件付きreturnの前に呼ぶ必要がある（React Hooks規約）
+  useTitle("ダイレクトメッセージ - CaX");
 
   const [conversation, setConversation] = useState<Models.DirectMessageConversation | null>(null);
   const [conversationError, setConversationError] = useState<Error | null>(null);
@@ -119,8 +121,6 @@ export const DirectMessageContainer = ({ activeUser, authModalId }: Props) => {
 
   const peer =
     conversation.initiator.id !== activeUser?.id ? conversation.initiator : conversation.member;
-
-  useTitle(`${peer.name} さんとのダイレクトメッセージ - CaX`);
 
   return (
     <DirectMessagePage
