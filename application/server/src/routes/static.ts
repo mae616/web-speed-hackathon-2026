@@ -24,10 +24,14 @@ staticRouter.get("/terms", (_req, res, next) => {
   try {
     const indexHtml = fs.readFileSync(indexPath, "utf-8");
     // スケルトンUIの部分を利用規約のコンテンツに置換
-    const html = indexHtml.replace(
-      /(<div id="app">)[\s\S]*?(<\/div>\s*(?:<script))/,
-      `$1${termsHtml}$2`,
-    );
+    const marker = '<div id="app">';
+    const idx = indexHtml.indexOf(marker);
+    if (idx === -1) { next(); return; }
+    const insertPos = idx + marker.length;
+    // 既存のスケルトンHTMLの終端（</div></body>の直前の</div>）を探す
+    const bodyEnd = indexHtml.indexOf('</body>');
+    const lastDivEnd = indexHtml.lastIndexOf('</div>', bodyEnd);
+    const html = indexHtml.slice(0, insertPos) + termsHtml + indexHtml.slice(lastDivEnd);
     res.type("text/html").send(html);
   } catch {
     next();
