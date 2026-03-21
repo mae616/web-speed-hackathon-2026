@@ -7,7 +7,8 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "start": "tsx src/index.ts",
+    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --outdir=dist --external:bcrypt --external:sqlite3 --external:sharp --external:ffmpeg-static --external:express --external:express-session --external:ws --external:sequelize --external:piexifjs --external:music-metadata --external:file-type --external:google-translate-api-x --external:compression --external:body-parser --external:serve-static --external:connect-history-api-fallback --external:http-errors --external:uuid --external:fluent-ffmpeg --loader:.md=text --alias:@web-speed-hackathon-2026/server=. --tsconfig=tsconfig.json",
+    "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "seed:generate": "tsx ./scripts/generateSeeds.ts",
     "seed:insert": "tsx ./scripts/insertSeeds.ts"
@@ -49,6 +50,7 @@
     "@types/node": "22.18.8",
     "@types/serve-static": "1.15.9",
     "@types/ws": "8.18.1",
+    "esbuild": "0.27.4",
     "typescript": "5.9.3"
   },
   "engines": {
