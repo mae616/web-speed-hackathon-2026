@@ -5,7 +5,6 @@ import path from "path";
 import { promisify } from "util";
 
 import { Router } from "express";
-import ffmpegPath from "ffmpeg-static";
 import httpErrors from "http-errors";
 import { v4 as uuidv4 } from "uuid";
 
@@ -29,6 +28,8 @@ async function convertMovie(inputBuffer: Buffer): Promise<Buffer> {
   try {
     await fs.writeFile(inputPath, inputBuffer);
 
+    // ffmpeg-staticは投稿時のみ使用するため、サーバー起動時間短縮のためdynamic importする
+    const ffmpegPath = (await import("ffmpeg-static")).default;
     await execFileAsync(ffmpegPath!, [
       "-i", inputPath,
       "-t", "5",

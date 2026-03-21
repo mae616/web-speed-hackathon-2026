@@ -58,13 +58,13 @@ export const AppContainer = () => {
 
   const [activeUser, setActiveUser] = useState<Models.User | null>(null);
   useEffect(() => {
-    // index.htmlのインラインスクリプトで先行開始したfetchの結果を再利用する。
-    // JSバンドルのパース時間分だけAPI待ちが短縮される。
-    const prefetch = (window as unknown as { __prefetch?: { me?: Promise<Models.User | null> } }).__prefetch;
-    const mePromise = prefetch?.me ?? fetchJSON<Models.User>("/api/v1/me").catch(() => null);
-    void mePromise.then((user) => {
-      if (user) setActiveUser(user);
-    });
+    void fetchJSON<Models.User>("/api/v1/me")
+      .then((user) => {
+        setActiveUser(user);
+      })
+      .catch(() => {
+        // 未ログイン時は404が返るため無視
+      });
   }, [setActiveUser]);
   const handleLogout = useCallback(async () => {
     await sendJSON("/api/v1/signout", {});
