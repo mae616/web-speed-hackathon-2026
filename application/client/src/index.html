@@ -28,6 +28,12 @@
       .sk-card-row{display:flex;gap:12px}
       .sk-card-body{flex:1;min-width:0}
       @media(min-width:1024px){.sk-nav{display:block}}
+      /* SSRコンテンツのFOUC防止: CSSロード前でもレイアウトが安定するよう最低限のスタイルを適用 */
+      #app{max-width:1280px;margin:0 auto}
+      #app article{max-width:640px;margin:0 auto;padding:8px 16px;line-height:1.625}
+      #app h1{font-size:1.875rem;font-weight:700;margin:16px 0 8px}
+      #app h2{font-size:1.5rem;font-weight:700;margin:16px 0 8px}
+      #app ol{list-style:decimal;padding-left:32px}
     </style>
   </head>
   <body class="bg-cax-canvas text-cax-text">
