@@ -6,7 +6,6 @@ import { promisify } from "util";
 
 import { Router } from "express";
 import ffmpegPath from "ffmpeg-static";
-import { fileTypeFromBuffer } from "file-type";
 import httpErrors from "http-errors";
 import { v4 as uuidv4 } from "uuid";
 
@@ -34,7 +33,7 @@ async function convertMovie(inputBuffer: Buffer): Promise<Buffer> {
       "-i", inputPath,
       "-t", "5",
       "-r", "10",
-      "-vf", "crop='min(iw,ih)':'min(iw,ih)'",
+      "-vf", "crop=min(iw\\,ih):min(iw\\,ih)",
       "-an",
       "-y",
       outputPath,
@@ -56,11 +55,8 @@ movieRouter.post("/movies", async (req, res) => {
     throw new httpErrors.BadRequest();
   }
 
-  const type = await fileTypeFromBuffer(req.body);
-  // クライアントから生の動画ファイル（mp4/webm等）を受け取り、サーバーで変換する
-  if (type === undefined || !["mp4", "webm", "mov", "avi", "gif"].includes(type.ext)) {
-    throw new httpErrors.BadRequest("Invalid file type");
-  }
+  // ffmpegが対応する任意の動画フォーマットを受け付ける（MKV等も含む）
+  // ファイルタイプ判定はffmpegに委ね、変換失敗時にエラーを返す
 
   const movieId = uuidv4();
 
