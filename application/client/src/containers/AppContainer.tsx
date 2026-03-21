@@ -3,6 +3,13 @@ import { HelmetProvider } from "react-helmet";
 import { Route, Routes, useLocation, useNavigate } from "react-router";
 
 import { AppPage } from "@web-speed-hackathon-2026/client/src/components/application/AppPage";
+/**
+ * AuthModalContainer / NewPostModalContainer は lazy() から外して直接importする。
+ * サインインフロー（4フロー最大200点に影響）と投稿フローの安定性を確保するため、
+ * モーダルのチャンクロード待ちによるタイムアウトを排除する。
+ */
+import { AuthModalContainer } from "@web-speed-hackathon-2026/client/src/containers/AuthModalContainer";
+import { NewPostModalContainer } from "@web-speed-hackathon-2026/client/src/containers/NewPostModalContainer";
 import { fetchJSON, sendJSON } from "@web-speed-hackathon-2026/client/src/utils/fetchers";
 
 /**
@@ -37,13 +44,6 @@ const CrokContainer = lazy(() =>
 const NotFoundContainer = lazy(() =>
   import("@web-speed-hackathon-2026/client/src/containers/NotFoundContainer").then((m) => ({ default: m.NotFoundContainer })),
 );
-const AuthModalContainer = lazy(() =>
-  import("@web-speed-hackathon-2026/client/src/containers/AuthModalContainer").then((m) => ({ default: m.AuthModalContainer })),
-);
-const NewPostModalContainer = lazy(() =>
-  import("@web-speed-hackathon-2026/client/src/containers/NewPostModalContainer").then((m) => ({ default: m.NewPostModalContainer })),
-);
-
 export const AppContainer = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -53,13 +53,13 @@ export const AppContainer = () => {
 
   const [activeUser, setActiveUser] = useState<Models.User | null>(null);
   useEffect(() => {
-    void fetchJSON<Models.User>("/api/v1/me")
-      .then((user) => {
-        setActiveUser(user);
-      })
-      .catch(() => {
-        // 未ログイン時は404が返るため無視
-      });
+    // index.htmlのインラインスクリプトで先行開始したfetchの結果を再利用する。
+    // JSバンドルのパース時間分だけAPI待ちが短縮される。
+    const prefetch = (window as unknown as { __prefetch?: { me?: Promise<Models.User | null> } }).__prefetch;
+    const mePromise = prefetch?.me ?? fetchJSON<Models.User>("/api/v1/me").catch(() => null);
+    void mePromise.then((user) => {
+      if (user) setActiveUser(user);
+    });
   }, [setActiveUser]);
   const handleLogout = useCallback(async () => {
     await sendJSON("/api/v1/signout", {});
@@ -105,10 +105,8 @@ export const AppContainer = () => {
         </Suspense>
       </AppPage>
 
-      <Suspense>
-        <AuthModalContainer id={authModalId} onUpdateActiveUser={setActiveUser} />
-        <NewPostModalContainer id={newPostModalId} />
-      </Suspense>
+      <AuthModalContainer id={authModalId} onUpdateActiveUser={setActiveUser} />
+      <NewPostModalContainer id={newPostModalId} />
     </HelmetProvider>
   );
 };

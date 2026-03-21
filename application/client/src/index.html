@@ -7,8 +7,80 @@
     <!-- カスタムフォントを事前ロードしてFOIT回避・LCP改善 -->
     <link rel="preload" href="/fonts/ReiNoAreMincho-Regular.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/ReiNoAreMincho-Heavy.woff2" as="font" type="font/woff2" crossorigin />
+    <!--
+      主要APIを先行fetch: JSバンドルのパース・実行を待たずにリクエスト開始。
+      結果はPromiseとしてグローバルに保持し、React側で再利用する。
+    -->
+    <script>window.__prefetch={me:fetch("/api/v1/me").then(function(r){return r.ok?r.json():null}).catch(function(){return null})}</script>
+    <style>
+      /* スケルトンUI: Reactマウント前のLCP候補を提供しCLS/FCP/LCPを改善 */
+      .sk{display:flex;justify-content:center;background:#f5f5f4;min-height:100vh;font-family:sans-serif}
+      .sk-wrap{display:flex;background:#fff;min-height:100vh;max-width:100%;width:100%}
+      .sk-nav{width:192px;border-right:1px solid #d6d3d1;padding:8px;display:none}
+      .sk-main{flex:1;min-width:0;max-width:640px;padding:16px}
+      .sk-item{height:40px;border-radius:9999px;background:#f5f5f4;margin-bottom:8px}
+      .sk-card{border-bottom:1px solid #d6d3d1;padding:16px 0}
+      .sk-avatar{width:40px;height:40px;border-radius:9999px;background:#d6d3d1;flex-shrink:0}
+      .sk-line{height:14px;border-radius:4px;background:#e7e5e4;margin-bottom:8px}
+      .sk-line-short{width:40%}
+      .sk-line-medium{width:70%}
+      .sk-line-long{width:90%}
+      .sk-card-row{display:flex;gap:12px}
+      .sk-card-body{flex:1;min-width:0}
+      @media(min-width:1024px){.sk-nav{display:block}}
+    </style>
   </head>
   <body class="bg-cax-canvas text-cax-text">
-    <div id="app"></div>
+    <div id="app">
+      <!--
+        スケルトンUI: JSバンドルのロード・パース・実行完了前に表示される。
+        ReactのcreateRoot().render()でこのDOM全体が置換される。
+        LCP候補としてテキストブロックを含め、CLS防止のためレイアウトを実ページに合わせる。
+      -->
+      <div class="sk">
+        <div class="sk-wrap">
+          <aside class="sk-nav">
+            <div style="padding-top:16px">
+              <div class="sk-item"></div>
+              <div class="sk-item"></div>
+              <div class="sk-item"></div>
+              <div class="sk-item"></div>
+            </div>
+          </aside>
+          <main class="sk-main">
+            <div class="sk-card">
+              <div class="sk-card-row">
+                <div class="sk-avatar"></div>
+                <div class="sk-card-body">
+                  <div class="sk-line sk-line-short"></div>
+                  <div class="sk-line sk-line-long"></div>
+                  <div class="sk-line sk-line-medium"></div>
+                </div>
+              </div>
+            </div>
+            <div class="sk-card">
+              <div class="sk-card-row">
+                <div class="sk-avatar"></div>
+                <div class="sk-card-body">
+                  <div class="sk-line sk-line-short"></div>
+                  <div class="sk-line sk-line-medium"></div>
+                  <div class="sk-line sk-line-long"></div>
+                </div>
+              </div>
+            </div>
+            <div class="sk-card">
+              <div class="sk-card-row">
+                <div class="sk-avatar"></div>
+                <div class="sk-card-body">
+                  <div class="sk-line sk-line-short"></div>
+                  <div class="sk-line sk-line-long"></div>
+                  <div class="sk-line sk-line-short"></div>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
