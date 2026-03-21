@@ -10,11 +10,18 @@ interface ReturnValues<T> {
   fetchMore: () => void;
 }
 
+/**
+ * 無限スクロール用のデータ取得フック。
+ * prefetchedDataを渡すとAPIレスポンス待ちを短縮できる（index.htmlの先行fetchと連携）。
+ */
 export function useInfiniteFetch<T>(
   apiPath: string,
   fetcher: (apiPath: string) => Promise<T[]>,
+  prefetchedData?: Promise<T[] | null> | null,
 ): ReturnValues<T> {
   const internalRef = useRef({ isLoading: false, offset: 0 });
+  // 先行fetchは初回のみ使用し、以降は通常fetchに切り替える
+  const prefetchRef = useRef(prefetchedData ?? null);
 
   const [result, setResult] = useState<Omit<ReturnValues<T>, "fetchMore">>({
     data: [],
@@ -37,7 +44,17 @@ export function useInfiniteFetch<T>(
       offset,
     };
 
-    void fetcher(apiPath).then(
+    // 先行fetchの結果があれば初回のみ使用する
+    let dataPromise: Promise<T[]>;
+    const prefetched = prefetchRef.current;
+    if (prefetched != null) {
+      prefetchRef.current = null;
+      dataPromise = prefetched.then((data) => data ?? fetcher(apiPath));
+    } else {
+      dataPromise = fetcher(apiPath);
+    }
+
+    void dataPromise.then(
       (allData) => {
         setResult((cur) => ({
           ...cur,
