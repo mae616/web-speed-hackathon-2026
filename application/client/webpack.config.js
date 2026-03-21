@@ -147,7 +147,7 @@ const config = {
       cacheGroups: {
         // React/Router/Redux: 初期ロード必須の軽量コアのみ
         react: {
-          test: /[\\/]node_modules[\\/](react|react-dom|react-router|react-helmet|redux|react-redux|redux-form)[\\/]/,
+          test: /[\\/]node_modules[\\/](react|react-dom|react-router|react-helmet)[\\/]/,
           name: "vendor",
           priority: 100,
           enforce: true,
