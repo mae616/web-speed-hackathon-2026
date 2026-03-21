@@ -9,6 +9,12 @@ import { AppPage } from "@web-speed-hackathon-2026/client/src/components/applica
  * モーダルのチャンクロード待ちによるタイムアウトを排除する。
  */
 import { AuthModalContainer } from "@web-speed-hackathon-2026/client/src/containers/AuthModalContainer";
+/**
+ * DM関連コンテナもlazy()から外す。
+ * fly.ioのCPU制約でチャンクロード+パースがTBTを悪化させるため。
+ */
+import { DirectMessageContainer } from "@web-speed-hackathon-2026/client/src/containers/DirectMessageContainer";
+import { DirectMessageListContainer } from "@web-speed-hackathon-2026/client/src/containers/DirectMessageListContainer";
 import { NewPostModalContainer } from "@web-speed-hackathon-2026/client/src/containers/NewPostModalContainer";
 import { fetchJSON, sendJSON } from "@web-speed-hackathon-2026/client/src/utils/fetchers";
 
@@ -19,12 +25,6 @@ import { fetchJSON, sendJSON } from "@web-speed-hackathon-2026/client/src/utils/
  */
 const TimelineContainer = lazy(() =>
   import("@web-speed-hackathon-2026/client/src/containers/TimelineContainer").then((m) => ({ default: m.TimelineContainer })),
-);
-const DirectMessageListContainer = lazy(() =>
-  import("@web-speed-hackathon-2026/client/src/containers/DirectMessageListContainer").then((m) => ({ default: m.DirectMessageListContainer })),
-);
-const DirectMessageContainer = lazy(() =>
-  import("@web-speed-hackathon-2026/client/src/containers/DirectMessageContainer").then((m) => ({ default: m.DirectMessageContainer })),
 );
 const SearchContainer = lazy(() =>
   import("@web-speed-hackathon-2026/client/src/containers/SearchContainer").then((m) => ({ default: m.SearchContainer })),
